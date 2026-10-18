@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 20% 97%;
+    --foreground: 215 28% 13%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 13%;
+    --primary: 189 76% 24%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 189 30% 92%;
+    --secondary-foreground: 189 70% 18%;
+    --muted: 210 18% 93%;
+    --muted-foreground: 215 14% 36%;
+    --accent: 189 35% 90%;
+    --accent-foreground: 189 70% 16%;
+    --destructive: 0 72% 42%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 18% 86%;
+    --input: 214 16% 72%;
+    --ring: 189 76% 30%;
+    color-scheme: light;
+  }
+  .dark {
+    --background: 215 28% 8%;
+    --foreground: 210 20% 94%;
+    --card: 215 25% 12%;
+    --card-foreground: 210 20% 94%;
+    --primary: 186 58% 52%;
+    --primary-foreground: 215 30% 8%;
+    --secondary: 189 30% 18%;
+    --secondary-foreground: 186 50% 85%;
+    --muted: 215 20% 17%;
+    --muted-foreground: 215 14% 70%;
+    --accent: 189 30% 20%;
+    --accent-foreground: 186 50% 88%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 215 30% 8%;
+    --border: 215 18% 23%;
+    --input: 215 16% 38%;
+    --ring: 186 58% 58%;
+    color-scheme: dark;
+  }
+  * {
+    @apply border-border;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  /* Itens de grid não devem crescer além da coluna por causa de textos longos. */
+  .grid > * {
+    min-width: 0;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Urgência: sempre acompanhada de texto. Contraste AA nos dois temas. */
+.urg-vencido, .urg-hoje { @apply bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-200 dark:border-red-800; }
+.urg-ate3 { @apply bg-orange-100 text-orange-900 border-orange-300 dark:bg-orange-950 dark:text-orange-200 dark:border-orange-800; }
+.urg-ate7 { @apply bg-yellow-100 text-yellow-900 border-yellow-300 dark:bg-yellow-950 dark:text-yellow-100 dark:border-yellow-700; }
+.urg-normal, .urg-cumprido { @apply bg-muted text-foreground border-border; }
+.faixa-vencido, .faixa-hoje { @apply border-l-red-600 dark:border-l-red-500; }
+.faixa-ate3 { @apply border-l-orange-500; }
+.faixa-ate7 { @apply border-l-yellow-400; }
+.faixa-normal, .faixa-cumprido { @apply border-l-slate-300 dark:border-l-slate-600; }
+
+@keyframes skeleton {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+@media print {
+  body { background: white !important; }
+  .nao-imprimir { display: none !important; }
+  .folha-a4 { box-shadow: none !important; margin: 0 !important; width: auto !important; min-height: 0 !important; padding: 0 !important; border: 0 !important; }
+  .area-impressao { padding: 0 !important; margin: 0 !important; }
+  @page { size: A4; margin: 18mm; }
+}
