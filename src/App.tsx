@@ -21,6 +21,7 @@ import { Processos, ProcessoDetalhe } from '@/pages/Processos'
 import { Honorarios } from '@/pages/Honorarios'
 import { Relatorio } from '@/pages/Relatorio'
 import { Configuracoes } from '@/pages/Configuracoes'
+import { Integracoes } from '@/pages/Integracoes'
 
 function Protegida({ rota, children }: { rota: Rota; children: ReactNode }) {
   const { usuario } = useApp()
@@ -47,7 +48,7 @@ function AvisoDadosRenovados() {
 function TituloDaPagina() {
   const { pathname } = useLocation()
   useEffect(() => {
-    const nomes: Record<string, string> = { intimacoes: 'Intimações', prazos: 'Prazos', tarefas: 'Tarefas', timesheet: 'Timesheet', processos: 'Processos', honorarios: 'Honorários', relatorio: 'Relatório', configuracoes: 'Configurações' }
+    const nomes: Record<string, string> = { intimacoes: 'Intimações', prazos: 'Prazos', tarefas: 'Tarefas', timesheet: 'Timesheet', processos: 'Processos', honorarios: 'Honorários', relatorio: 'Relatório', configuracoes: 'Configurações', integracoes: 'Integrações' }
     const secao = nomes[pathname.split('/')[1]] ?? ({ pauta: 'Pauta do Dia', 'meu-dia': 'Meu dia' } as Record<string, string>)[pathname.split('/')[1]] ?? 'Início'
     document.title = `${secao} · Pauta`
   }, [pathname])
@@ -76,6 +77,7 @@ export default function App() {
                 <Route path="/processos/:id" element={<Protegida rota="processos"><ProcessoDetalhe /></Protegida>} />
                 <Route path="/honorarios" element={<Protegida rota="honorarios"><Honorarios /></Protegida>} />
                 <Route path="/relatorio" element={<Protegida rota="relatorio"><Relatorio /></Protegida>} />
+                <Route path="/integracoes" element={<Integracoes />} />
                 <Route path="/configuracoes" element={<Protegida rota="configuracoes"><Configuracoes /></Protegida>} />
                 <Route path="*" element={<EstadoVazio icone={ShieldOff} titulo="Página não encontrada" descricao="O endereço não existe no protótipo." acao={<LinkBotao to="/">Ir para o início</LinkBotao>} />} />
               </Routes>

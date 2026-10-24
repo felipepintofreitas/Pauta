@@ -13,6 +13,7 @@ import {
   Settings,
   Search,
   CalendarDays,
+  Plug,
   ChevronLeft,
   Home,
   type LucideIcon,
@@ -105,9 +106,11 @@ export function Shell({ children }: { children: ReactNode }) {
   const lancaHoras = pode(usuario.perfil, 'lancarHoras')
   const caminho = local.pathname
   const emConfig = caminho.startsWith('/configuracoes')
+  const emIntegracoes = caminho.startsWith('/integracoes')
   const pendentesPauta = Object.values(contagens).reduce((s, n) => s + (n ?? 0), 0)
   const navegacao: { rotulo: string; caminho: string; icone: LucideIcon; ativo: boolean; contagem?: number }[] = [
-    { rotulo: 'Pauta do Dia', caminho: '/pauta', icone: CalendarDays, ativo: caminho !== '/' && !emConfig, contagem: pendentesPauta },
+    { rotulo: 'Pauta do Dia', caminho: '/pauta', icone: CalendarDays, ativo: caminho !== '/' && !emConfig && !emIntegracoes, contagem: pendentesPauta },
+    { rotulo: 'Integrações', caminho: '/integracoes', icone: Plug, ativo: emIntegracoes },
   ]
   if (menu.includes('configuracoes')) navegacao.push({ rotulo: 'Configurações', caminho: '/configuracoes', icone: Settings, ativo: emConfig })
   const modulo = (Object.keys(ITENS_MENU) as Rota[]).find((r) => r !== 'configuracoes' && caminho.startsWith(ITENS_MENU[r].caminho) && ITENS_MENU[r].caminho !== '/')
@@ -201,7 +204,7 @@ export function Shell({ children }: { children: ReactNode }) {
 
       {/* Navegação inferior (celular) */}
       <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t bg-card md:hidden">
-        <ul className={cn('grid', navegacao.length === 2 ? 'grid-cols-3' : 'grid-cols-2')}>
+        <ul className={cn('grid', navegacao.length === 3 ? 'grid-cols-4' : 'grid-cols-3')}>
           {[...navegacao.slice(0, 1), { rotulo: 'Buscar', caminho: '', icone: Search, ativo: false, contagem: 0 }, ...navegacao.slice(1)].map((item) => {
             const Icone = item.icone
             const conteudo = (
