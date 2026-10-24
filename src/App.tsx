@@ -10,6 +10,8 @@ import { NOMES_PERFIL } from '@/data/tipos'
 import { podeAcessar, type Rota } from '@/lib/permissoes'
 import { useEffect, type ReactNode } from 'react'
 import { MeuDia } from '@/pages/MeuDia'
+import { Inicio } from '@/pages/Inicio'
+import { PautaDoDia } from '@/pages/PautaDoDia'
 import { Intimacoes } from '@/pages/Intimacoes'
 import { IntimacaoDetalhe } from '@/pages/IntimacaoDetalhe'
 import { Prazos } from '@/pages/Prazos'
@@ -27,8 +29,8 @@ function Protegida({ rota, children }: { rota: Rota; children: ReactNode }) {
     <EstadoVazio
       icone={ShieldOff}
       titulo="Esta tela não faz parte do seu perfil"
-      descricao={`O perfil ${NOMES_PERFIL[usuario.perfil]} não tem acesso a esta área. Troque o perfil no topo da tela ou volte ao seu dia.`}
-      acao={<LinkBotao to="/">Ir para Meu dia</LinkBotao>}
+      descricao={`O perfil ${NOMES_PERFIL[usuario.perfil]} não tem acesso a esta área. Troque o perfil no topo da tela ou volte ao início.`}
+      acao={<LinkBotao to="/">Ir para o início</LinkBotao>}
     />
   )
 }
@@ -46,7 +48,7 @@ function TituloDaPagina() {
   const { pathname } = useLocation()
   useEffect(() => {
     const nomes: Record<string, string> = { intimacoes: 'Intimações', prazos: 'Prazos', tarefas: 'Tarefas', timesheet: 'Timesheet', processos: 'Processos', honorarios: 'Honorários', relatorio: 'Relatório', configuracoes: 'Configurações' }
-    const secao = nomes[pathname.split('/')[1]] ?? 'Meu dia'
+    const secao = nomes[pathname.split('/')[1]] ?? ({ pauta: 'Pauta do Dia', 'meu-dia': 'Meu dia' } as Record<string, string>)[pathname.split('/')[1]] ?? 'Início'
     document.title = `${secao} · Pauta`
   }, [pathname])
   return null
@@ -62,7 +64,9 @@ export default function App() {
             <TituloDaPagina />
             <Shell>
               <Routes>
-                <Route path="/" element={<MeuDia />} />
+                <Route path="/" element={<Inicio />} />
+                <Route path="/pauta" element={<PautaDoDia />} />
+                <Route path="/meu-dia" element={<MeuDia />} />
                 <Route path="/intimacoes" element={<Protegida rota="intimacoes"><Intimacoes /></Protegida>} />
                 <Route path="/intimacoes/:id" element={<Protegida rota="intimacoes"><IntimacaoDetalhe /></Protegida>} />
                 <Route path="/prazos" element={<Protegida rota="prazos"><Prazos /></Protegida>} />
@@ -73,7 +77,7 @@ export default function App() {
                 <Route path="/honorarios" element={<Protegida rota="honorarios"><Honorarios /></Protegida>} />
                 <Route path="/relatorio" element={<Protegida rota="relatorio"><Relatorio /></Protegida>} />
                 <Route path="/configuracoes" element={<Protegida rota="configuracoes"><Configuracoes /></Protegida>} />
-                <Route path="*" element={<EstadoVazio icone={ShieldOff} titulo="Página não encontrada" descricao="O endereço não existe no protótipo." acao={<LinkBotao to="/">Ir para Meu dia</LinkBotao>} />} />
+                <Route path="*" element={<EstadoVazio icone={ShieldOff} titulo="Página não encontrada" descricao="O endereço não existe no protótipo." acao={<LinkBotao to="/">Ir para o início</LinkBotao>} />} />
               </Routes>
             </Shell>
           </HashRouter>

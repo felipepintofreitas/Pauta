@@ -180,7 +180,7 @@ export function Prazos() {
             {ORDEM_URGENCIA.filter((n) => grupos[n]).map((n) => (
               <section key={n} aria-label={TITULO_GRUPO[n]}>
                 <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                  {TITULO_GRUPO[n]} ({grupos[n]!.length})
+                  {n === 'hoje' && dataReferencia() !== hojeISO() ? 'Vencem no próximo dia útil' : TITULO_GRUPO[n]} ({grupos[n]!.length})
                 </h2>
                 <ul className="grid gap-2 md:grid-cols-2">
                   {grupos[n]!.map((p) => (

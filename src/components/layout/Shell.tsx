@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import {
   Sun,
   Moon,
@@ -14,7 +14,9 @@ import {
   Search,
   PanelLeftClose,
   PanelLeftOpen,
-  MoreHorizontal,
+  LayoutGrid,
+  CalendarDays,
+  ChevronLeft,
   Home,
   type LucideIcon,
 } from 'lucide-react'
@@ -33,7 +35,7 @@ import { BuscaGlobal } from '../BuscaGlobal'
 import { LancarHorasDialog } from '../LancarHorasDialog'
 
 export const ITENS_MENU: Record<Rota, { rotulo: string; curto: string; caminho: string; icone: LucideIcon }> = {
-  'meu-dia': { rotulo: 'Meu dia', curto: 'Meu dia', caminho: '/', icone: Home },
+  'meu-dia': { rotulo: 'Meu dia', curto: 'Meu dia', caminho: '/meu-dia', icone: Home },
   intimacoes: { rotulo: 'Intimações', curto: 'Intimações', caminho: '/intimacoes', icone: Inbox },
   prazos: { rotulo: 'Prazos', curto: 'Prazos', caminho: '/prazos', icone: CalendarClock },
   tarefas: { rotulo: 'Tarefas e controladoria', curto: 'Tarefas', caminho: '/tarefas', icone: ListChecks },
@@ -64,7 +66,7 @@ function Marca({ recolhido }: { recolhido?: boolean }) {
   )
 }
 
-function useContagens(): Partial<Record<Rota, number>> {
+export function useContagens(): Partial<Record<Rota, number>> {
   const { db, usuario } = useApp()
   if (usuario.perfil === 'controladoria') return { intimacoes: db.intimacoes.filter((i) => i.status === 'Nova').length }
   if (usuario.perfil === 'financeiro') return { timesheet: db.lancamentos.filter((l) => l.status === 'Enviado').length }
@@ -98,19 +100,23 @@ export function Shell({ children }: { children: ReactNode }) {
   const local = useLocation()
   const contagens = useContagens()
   const [recolhido, setRecolhido] = useState(() => ler<boolean>('pauta:menu-recolhido') ?? false)
-  const [maisAberto, setMaisAberto] = useState(false)
   const [perfilAberto, setPerfilAberto] = useState(false)
   useEffect(() => gravar('pauta:menu-recolhido', recolhido), [recolhido])
   useEffect(() => {
-    setMaisAberto(false)
     window.scrollTo(0, 0)
   }, [local.pathname])
 
   const menu = menuDoPerfil(usuario.perfil)
   const lancaHoras = pode(usuario.perfil, 'lancarHoras')
-  const principais = menu.slice(0, 4)
-  const extras = menu.slice(4)
-  const extraAtivo = extras.some((r) => ITENS_MENU[r].caminho !== '/' && local.pathname.startsWith(ITENS_MENU[r].caminho))
+  const caminho = local.pathname
+  const emConfig = caminho.startsWith('/configuracoes')
+  const pendentesPauta = Object.values(contagens).reduce((s, n) => s + (n ?? 0), 0)
+  const navegacao: { rotulo: string; caminho: string; icone: LucideIcon; ativo: boolean; contagem?: number }[] = [
+    { rotulo: 'Início', caminho: '/', icone: LayoutGrid, ativo: caminho === '/' },
+    { rotulo: 'Pauta do Dia', caminho: '/pauta', icone: CalendarDays, ativo: caminho !== '/' && !emConfig, contagem: pendentesPauta },
+  ]
+  if (menu.includes('configuracoes')) navegacao.push({ rotulo: 'Configurações', caminho: '/configuracoes', icone: Settings, ativo: emConfig })
+  const modulo = (Object.keys(ITENS_MENU) as Rota[]).find((r) => r !== 'configuracoes' && caminho.startsWith(ITENS_MENU[r].caminho) && ITENS_MENU[r].caminho !== '/')
 
   return (
     <div className="min-h-dvh">
@@ -129,33 +135,29 @@ export function Shell({ children }: { children: ReactNode }) {
           )}
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-          {menu.map((r) => {
-            const item = ITENS_MENU[r]
+          {navegacao.map((item) => {
             const Icone = item.icone
-            const n = contagens[r]
             return (
-              <NavLink
-                key={r}
+              <Link
+                key={item.caminho}
                 to={item.caminho}
-                end={item.caminho === '/'}
+                aria-current={item.ativo ? 'page' : undefined}
                 title={recolhido ? item.rotulo : undefined}
-                className={({ isActive }) =>
-                  cn(
-                    'relative flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors',
-                    recolhido && 'justify-center px-0',
-                    isActive ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                  )
-                }
+                className={cn(
+                  'relative flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors',
+                  recolhido && 'justify-center px-0',
+                  item.ativo ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
               >
                 <Icone className="size-5 shrink-0" aria-hidden />
                 <span className={cn(recolhido && 'sr-only')}>{item.rotulo}</span>
-                {!!n && (
+                {!!item.contagem && (
                   <span className={cn('ml-auto rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground', recolhido && 'absolute right-1 top-1')}>
-                    {n}
+                    {item.contagem}
                     <span className="sr-only"> pendentes</span>
                   </span>
                 )}
-              </NavLink>
+              </Link>
             )
           })}
         </nav>
@@ -212,73 +214,54 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
 
         <main id="conteudo" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-4 pb-36 pt-4 md:px-6 md:pb-10 md:pt-6">
+          {modulo && (
+            <nav aria-label="Você está em" className="mb-2 text-sm">
+              <Link to="/pauta" className="inline-flex min-h-11 items-center gap-1 font-medium text-primary hover:underline md:min-h-0">
+                <ChevronLeft className="size-4" aria-hidden /> Pauta do Dia
+              </Link>
+              <span className="text-muted-foreground"> / {ITENS_MENU[modulo].rotulo}</span>
+            </nav>
+          )}
           {children}
         </main>
       </div>
 
       {/* Navegação inferior (celular) */}
       <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t bg-card md:hidden">
-        <ul className="grid grid-cols-5">
-          {principais.map((r) => {
-            const item = ITENS_MENU[r]
+        <ul className={cn('grid', navegacao.length === 3 ? 'grid-cols-4' : 'grid-cols-3')}>
+          {[...navegacao.slice(0, 2), { rotulo: 'Buscar', caminho: '', icone: Search, ativo: false, contagem: 0 }, ...navegacao.slice(2)].map((item) => {
             const Icone = item.icone
-            const n = contagens[r]
+            const conteudo = (
+              <>
+                <span className={cn('grid h-7 w-12 place-items-center rounded-full', item.ativo && 'bg-secondary')}>
+                  <Icone className="size-5" aria-hidden />
+                </span>
+                {item.rotulo === 'Configurações' ? 'Ajustes' : item.rotulo}
+                {!!item.contagem && (
+                  <span className="absolute right-3 top-1.5 rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
+                    {item.contagem}
+                    <span className="sr-only"> pendentes</span>
+                  </span>
+                )}
+              </>
+            )
+            const classe = cn('relative flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-medium', item.ativo ? 'text-primary' : 'text-muted-foreground')
             return (
-              <li key={r}>
-                <NavLink
-                  to={item.caminho}
-                  end={item.caminho === '/'}
-                  className={({ isActive }) => cn('relative flex min-h-16 flex-col items-center justify-center gap-0.5 text-[11px] font-medium', isActive ? 'text-primary' : 'text-muted-foreground')}
-                >
-                  {({ isActive }) => (
-                    <>
-                      <span className={cn('grid h-7 w-12 place-items-center rounded-full', isActive && 'bg-secondary')}>
-                        <Icone className="size-5" aria-hidden />
-                      </span>
-                      {item.curto}
-                      {!!n && (
-                        <span className="absolute right-3 top-1.5 rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
-                          {n}
-                          <span className="sr-only"> pendentes</span>
-                        </span>
-                      )}
-                    </>
-                  )}
-                </NavLink>
+              <li key={item.rotulo}>
+                {item.caminho ? (
+                  <Link to={item.caminho} aria-current={item.ativo ? 'page' : undefined} className={classe}>
+                    {conteudo}
+                  </Link>
+                ) : (
+                  <button type="button" onClick={() => setBuscaAberta(true)} className={classe}>
+                    {conteudo}
+                  </button>
+                )}
               </li>
             )
           })}
-          <li>
-            <button
-              type="button"
-              onClick={() => setMaisAberto(true)}
-              className={cn('flex min-h-16 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-medium', extraAtivo ? 'text-primary' : 'text-muted-foreground')}
-            >
-              <span className={cn('grid h-7 w-12 place-items-center rounded-full', extraAtivo && 'bg-secondary')}>
-                <MoreHorizontal className="size-5" aria-hidden />
-              </span>
-              Mais
-            </button>
-          </li>
         </ul>
       </nav>
-
-      <Dialog aberto={maisAberto} aoFechar={() => setMaisAberto(false)} titulo="Mais opções" tamanho="sm">
-        <ul className="space-y-1">
-          {extras.map((r) => {
-            const item = ITENS_MENU[r]
-            const Icone = item.icone
-            return (
-              <li key={r}>
-                <NavLink to={item.caminho} className={({ isActive }) => cn('flex min-h-12 items-center gap-3 rounded-md px-3 text-sm font-medium', isActive ? 'bg-secondary' : 'hover:bg-muted')}>
-                  <Icone className="size-5" aria-hidden />
-                  {item.rotulo}
-                </NavLink>
-              </li>
-            )
-          })}
-        </ul>
-      </Dialog>
 
       <Dialog aberto={perfilAberto} aoFechar={() => setPerfilAberto(false)} titulo="Perfil do protótipo" descricao="Trocar o perfil muda o menu, a tela inicial e as permissões." tamanho="sm">
         <SeletorPerfil id="perfil-mobile" />
