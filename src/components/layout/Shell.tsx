@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Home,
   Check,
+  Plus,
   LogOut,
   Menu as MenuIcone,
   X,
@@ -200,7 +201,7 @@ function usePainel() {
 }
 
 /** Menu colapsável no canto superior direito com as áreas do sistema. */
-function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
+function MenuPrincipal({ itens, aoLancarHoras }: { itens: ItemNavegacao[]; aoLancarHoras?: () => void }) {
   const { aberto, setAberto, caixa, botao } = usePainel()
   const pendentes = itens.reduce((s, i) => s + (i.contagem ?? 0), 0)
   return (
@@ -242,6 +243,21 @@ function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
               )
             })}
           </ul>
+          {aoLancarHoras && (
+            <div className="mt-1 border-t pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setAberto(false)
+                  aoLancarHoras()
+                }}
+                className="flex min-h-11 w-full items-center gap-3 rounded-md px-3 text-sm font-medium hover:bg-muted"
+              >
+                <Plus className="size-4 shrink-0" aria-hidden />
+                Lançar horas
+              </button>
+            </div>
+          )}
         </nav>
       )}
     </div>
@@ -250,7 +266,7 @@ function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
 
 export function Shell({ children }: { children: ReactNode }) {
   const { usuario, trocarUsuario } = useApp()
-  const { setBuscaAberta } = useUi()
+  const { setBuscaAberta, abrirLancamento } = useUi()
   const [conectado, setConectado] = useState(() => ler<string>('pauta:sessao') !== 'saiu')
   const tema = useTema()
   const local = useLocation()
@@ -315,7 +331,7 @@ export function Shell({ children }: { children: ReactNode }) {
               {tema.escuro ? <Sun /> : <Moon />}
             </Button>
             <MenuUsuario aoSair={sair} />
-            <MenuPrincipal itens={navegacao} />
+            <MenuPrincipal itens={navegacao} aoLancarHoras={lancaHoras ? () => abrirLancamento() : undefined} />
           </div>
         </header>
 

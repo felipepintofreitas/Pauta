@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '@/store/store'
 import { menuDoPerfil, pode, type Rota } from '@/lib/permissoes'
-import { CronometroBarra } from '@/components/Cronometro'
+import { CronometroDia } from '@/components/Cronometro'
 import { CabecalhoPagina } from '@/components/Cabecalho'
 import { ITENS_MENU, useContagens } from '@/components/layout/Shell'
 
@@ -50,7 +50,7 @@ export function PautaDoDia() {
               </Link>
               {r === 'timesheet' && pode(usuario.perfil, 'lancarHoras') && (
                 <div className="relative z-10 mt-auto self-start">
-                  <CronometroBarra />
+                  <CronometroDia />
                 </div>
               )}
             </li>

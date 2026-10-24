@@ -79,6 +79,18 @@ export function CronometroBarra() {
   )
 }
 
+/** Versão compacta para os cards: parado, só o botão "Iniciar Dia"; em uso, o cronômetro completo. */
+export function CronometroDia() {
+  const { iniciarCronometro } = useApp()
+  const { ativo } = useTempo()
+  if (ativo) return <CronometroBarra />
+  return (
+    <Button size="sm" onClick={() => iniciarCronometro()}>
+      <Play /> Iniciar Dia
+    </Button>
+  )
+}
+
 /** Botão flutuante (celular). */
 export function CronometroFlutuante() {
   const { iniciarCronometro, pausarCronometro, retomarCronometro } = useApp()
