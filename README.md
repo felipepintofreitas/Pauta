@@ -22,7 +22,7 @@ Hospedado na Vercel, importando este repositório com o preset Vite (build `npm 
 ```
 src/
   pages/        uma tela por arquivo (Meu dia, Intimações, Prazos, Tarefas, Timesheet, Processos, Honorários, Relatório, Configurações)
-  components/   layout (menu lateral, barra inferior), diálogos, cronômetro, busca global e componentes no estilo shadcn/ui em components/ui
+  components/   layout (barra superior, barra inferior no celular), diálogos, cronômetro, busca global e componentes no estilo shadcn/ui em components/ui
   data/         tipos, feriados por tribunal e gerador de dados simulados (seed.ts)
   lib/          prazo.ts (cálculo de prazo, isolado e testado), urgência, formatação pt-BR, permissões por perfil
   store/        estado da aplicação (React Context) com persistência protegida por try/catch

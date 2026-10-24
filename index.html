@@ -12,9 +12,9 @@
     <script>
       try {
         var forcado = document.documentElement.getAttribute('data-theme');
-        var t = forcado === 'dark' ? 'escuro' : forcado === 'light' ? 'claro' : localStorage.getItem('pauta:tema');
-        if (t === 'escuro' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
-      } catch (e) {}
+        var t = forcado === 'dark' ? 'escuro' : forcado === 'light' ? 'claro' : localStorage.getItem('pauta:tema-v2');
+        if (t !== 'claro') document.documentElement.classList.add('dark');
+      } catch (e) { document.documentElement.classList.add('dark'); }
     </script>
   </head>
   <body>

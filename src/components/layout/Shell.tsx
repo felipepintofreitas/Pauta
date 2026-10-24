@@ -12,8 +12,6 @@ import {
   FileText,
   Settings,
   Search,
-  PanelLeftClose,
-  PanelLeftOpen,
   LayoutGrid,
   CalendarDays,
   ChevronLeft,
@@ -24,7 +22,7 @@ import { useApp } from '@/store/store'
 import { useUi } from '@/store/ui'
 import { NOMES_PERFIL, type Perfil } from '@/data/tipos'
 import { menuDoPerfil, pode, type Rota } from '@/lib/permissoes'
-import { gravar, ler } from '@/lib/armazenamento'
+import { gravar } from '@/lib/armazenamento'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { Dialog } from '../ui/dialog'
@@ -50,18 +48,18 @@ function useTema() {
   const [escuro, setEscuro] = useState(() => document.documentElement.classList.contains('dark'))
   useEffect(() => {
     document.documentElement.classList.toggle('dark', escuro)
-    gravar('pauta:tema', escuro ? 'escuro' : 'claro')
+    gravar('pauta:tema-v2', escuro ? 'escuro' : 'claro')
   }, [escuro])
   return { escuro, alternar: () => setEscuro((v) => !v) }
 }
 
-function Marca({ recolhido }: { recolhido?: boolean }) {
+function Marca() {
   return (
     <span className="flex items-center gap-2 font-semibold tracking-tight">
       <span aria-hidden className="grid size-8 place-items-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
         P
       </span>
-      {!recolhido && <span className="text-lg">Pauta</span>}
+      <span className="text-lg">Pauta</span>
     </span>
   )
 }
@@ -99,9 +97,7 @@ export function Shell({ children }: { children: ReactNode }) {
   const tema = useTema()
   const local = useLocation()
   const contagens = useContagens()
-  const [recolhido, setRecolhido] = useState(() => ler<boolean>('pauta:menu-recolhido') ?? false)
   const [perfilAberto, setPerfilAberto] = useState(false)
-  useEffect(() => gravar('pauta:menu-recolhido', recolhido), [recolhido])
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [local.pathname])
@@ -124,88 +120,67 @@ export function Shell({ children }: { children: ReactNode }) {
         Pular para o conteúdo
       </a>
 
-      {/* Menu lateral (desktop) */}
-      <aside className={cn('fixed inset-y-0 left-0 z-30 hidden flex-col border-r bg-card transition-[width] md:flex', recolhido ? 'w-[4.5rem]' : 'w-60')} aria-label="Menu principal">
-        <div className={cn('flex h-16 items-center border-b', recolhido ? 'justify-center' : 'justify-between px-4')}>
-          <Marca recolhido={recolhido} />
-          {!recolhido && (
-            <Button variant="ghost" size="icon" onClick={() => setRecolhido(true)} aria-label="Recolher menu">
-              <PanelLeftClose />
-            </Button>
-          )}
-        </div>
-        <nav className="flex-1 space-y-1 overflow-y-auto p-2">
-          {navegacao.map((item) => {
-            const Icone = item.icone
-            return (
-              <Link
-                key={item.caminho}
-                to={item.caminho}
-                aria-current={item.ativo ? 'page' : undefined}
-                title={recolhido ? item.rotulo : undefined}
-                className={cn(
-                  'relative flex min-h-11 items-center gap-3 rounded-md px-3 text-sm font-medium transition-colors',
-                  recolhido && 'justify-center px-0',
-                  item.ativo ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-                )}
-              >
-                <Icone className="size-5 shrink-0" aria-hidden />
-                <span className={cn(recolhido && 'sr-only')}>{item.rotulo}</span>
-                {!!item.contagem && (
-                  <span className={cn('ml-auto rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground', recolhido && 'absolute right-1 top-1')}>
-                    {item.contagem}
-                    <span className="sr-only"> pendentes</span>
-                  </span>
-                )}
-              </Link>
-            )
-          })}
-        </nav>
-        {recolhido && (
-          <div className="flex justify-center border-t p-2">
-            <Button variant="ghost" size="icon" onClick={() => setRecolhido(false)} aria-label="Expandir menu">
-              <PanelLeftOpen />
-            </Button>
-          </div>
-        )}
-      </aside>
-
-      <div className={cn('flex min-h-dvh flex-col transition-[padding]', recolhido ? 'md:pl-[4.5rem]' : 'md:pl-60')}>
+      <div className="flex min-h-dvh flex-col">
         {/* Barra superior */}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-card/95 px-3 backdrop-blur md:h-16 md:px-6">
-          <span className="md:hidden">
+          <Link to="/" aria-label="Pauta, ir para o início" className="shrink-0 rounded-md">
             <Marca />
-          </span>
+          </Link>
+          <nav aria-label="Menu principal" className="ml-4 hidden items-center gap-1 md:flex">
+            {navegacao.map((item) => {
+              const Icone = item.icone
+              return (
+                <Link
+                  key={item.caminho}
+                  to={item.caminho}
+                  aria-current={item.ativo ? 'page' : undefined}
+                  className={cn(
+                    'relative flex min-h-11 items-center gap-2 whitespace-nowrap rounded-md px-3 text-sm font-medium transition-colors',
+                    item.ativo ? 'bg-secondary text-secondary-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                  )}
+                >
+                  <Icone className="size-4 shrink-0" aria-hidden />
+                  {item.rotulo}
+                  {!!item.contagem && (
+                    <span className="rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+                      {item.contagem}
+                      <span className="sr-only"> pendentes</span>
+                    </span>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
           <button
             type="button"
             onClick={() => setBuscaAberta(true)}
-            className="hidden min-h-10 w-full max-w-sm items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground hover:bg-muted md:flex"
+            className="ml-2 hidden min-h-10 w-full min-w-0 max-w-sm items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground hover:bg-muted xl:flex"
           >
-            <Search className="size-4" aria-hidden />
-            Buscar processo, cliente, tarefa…
-            <kbd className="ml-auto rounded border bg-muted px-1.5 text-xs">Ctrl K</kbd>
+            <Search className="size-4 shrink-0" aria-hidden />
+            <span className="truncate">Buscar processo, cliente, tarefa…</span>
+            <kbd className="ml-auto whitespace-nowrap rounded border bg-muted px-1.5 text-xs">Ctrl K</kbd>
           </button>
           <div className="ml-auto flex items-center gap-1 md:gap-2">
             {lancaHoras && (
-              <div className="hidden md:block">
+              <div className="hidden lg:block">
                 <CronometroBarra />
               </div>
             )}
-            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setBuscaAberta(true)} aria-label="Buscar">
+            <Button variant="ghost" size="icon" className="xl:hidden" onClick={() => setBuscaAberta(true)} aria-label="Buscar">
               <Search />
             </Button>
             <Button variant="ghost" size="icon" onClick={tema.alternar} aria-label={tema.escuro ? 'Usar modo claro' : 'Usar modo escuro'}>
               {tema.escuro ? <Sun /> : <Moon />}
             </Button>
-            <div className="hidden items-center gap-2 lg:flex">
+            <div className="hidden items-center gap-2 xl:flex">
               <label htmlFor="perfil-desktop" className="text-xs text-muted-foreground">
                 Perfil
               </label>
-              <SeletorPerfil id="perfil-desktop" className="w-64" />
+              <SeletorPerfil id="perfil-desktop" className="w-56" />
             </div>
-            <Button variant="ghost" className="gap-2 px-2 lg:hidden" onClick={() => setPerfilAberto(true)} aria-label={`Trocar perfil (atual: ${usuario.nome}, ${NOMES_PERFIL[usuario.perfil]})`}>
+            <Button variant="ghost" className="gap-2 px-2 xl:hidden" onClick={() => setPerfilAberto(true)} aria-label={`Trocar perfil (atual: ${usuario.nome}, ${NOMES_PERFIL[usuario.perfil]})`}>
               <Avatar nome={usuario.nome} id={usuario.id} />
-              <span className="hidden text-left text-xs leading-tight sm:block">
+              <span className="hidden text-left text-xs leading-tight sm:max-md:block">
                 <span className="block font-medium text-foreground">{usuario.nome}</span>
                 <span className="block text-muted-foreground">{NOMES_PERFIL[usuario.perfil]}</span>
               </span>
