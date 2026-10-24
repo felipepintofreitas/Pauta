@@ -15,7 +15,7 @@ Requer Node 20 ou superior.
 
 ## Publicação
 
-Cada push no `main` publica o app no GitHub Pages pelo workflow `.github/workflows/deploy.yml`: https://felipepintofreitas.github.io/Pauta/
+Hospedado na Vercel, importando este repositório com o preset Vite (build `npm run build`, saída `dist`). Cada push no `main` gera uma nova publicação.
 
 ## Organização
 
