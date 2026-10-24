@@ -13,6 +13,8 @@ import { somaMinutos, valorLancamento } from '@/lib/negocio'
 import { useCarregando } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
 import { CabecalhoPagina } from '@/components/Cabecalho'
+import { AcaoIntegracao } from '@/components/Integracao'
+import { Download } from 'lucide-react'
 import { Tabs } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -56,6 +58,7 @@ export function Timesheet() {
               <Button variant="outline" onClick={() => setLembrete(true)}>
                 <Bell /> Simular lembrete de fim de dia
               </Button>
+              <AcaoIntegracao sistema="TimeShifter" rotulo="Importar do TimeShifter" icone={Download} />
               <Button onClick={() => abrirLancamento()}>
                 <Plus /> Lançar horas
               </Button>

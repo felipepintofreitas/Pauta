@@ -23,6 +23,8 @@ import { PrazoDetalheDialog, PrazoItem } from '@/components/PrazoDetalhe'
 import { UrgenciaBadge } from '@/components/Urgencia'
 import { Pessoa } from '@/components/Avatar'
 import { BotaoIniciarCronometro } from '@/components/Cronometro'
+import { BlocoIntegracoes } from '@/components/Integracao'
+import { BookOpen, Calculator, FileSearch, FileSignature, Gavel, Users } from 'lucide-react'
 
 export function Processos() {
   const { db, usuario } = useApp()
@@ -32,6 +34,7 @@ export function Processos() {
   const [area, setArea] = useState('')
   const [tribunal, setTribunal] = useState('')
   const [cliente, setCliente] = useState(params.get('cliente') ?? '')
+  const [sistema, setSistema] = useState(params.get('sistema') ?? '')
   const [meus, setMeus] = useState(vePropriosPorPadrao(usuario.perfil) && usuario.perfil === 'advogado')
   const carregando = useCarregando()
 
@@ -43,16 +46,17 @@ export function Processos() {
       if (area && p.area !== area) return false
       if (tribunal && p.tribunal !== tribunal) return false
       if (cliente && p.clienteId !== cliente) return false
+      if (sistema && p.sistema !== sistema) return false
       if (t) {
         const alvo = normalizar(`${p.numero} ${q.cliente(p.clienteId)?.nome} ${p.parteContraria}`)
         if (!alvo.includes(t) && !(digitos.length >= 4 && p.numero.replace(/\D/g, '').includes(digitos))) return false
       }
       return true
     })
-  }, [db.processos, busca, area, tribunal, cliente, meus, usuario.id, q])
+  }, [db.processos, busca, area, tribunal, cliente, sistema, meus, usuario.id, q])
 
   const areas = Array.from(new Set(db.processos.map((p) => p.area))).sort()
-  const filtros = [area, tribunal, cliente].filter(Boolean).length + (meus ? 1 : 0)
+  const filtros = [area, tribunal, cliente, sistema].filter(Boolean).length + (meus ? 1 : 0)
 
   return (
     <div>
@@ -86,6 +90,12 @@ export function Processos() {
           <Checkbox checked={meus} onChange={(e) => setMeus(e.target.checked)} /> Só os meus
         </label>
       </div>
+      {sistema && (
+        <Button variant="outline" size="sm" className="mb-4" onClick={() => setSistema('')}>
+          Sistema: {sistema} <X aria-hidden />
+          <span className="sr-only">(remover filtro)</span>
+        </Button>
+      )}
       {carregando ? (
         <SkeletonLista />
       ) : !lista.length ? (
@@ -101,6 +111,7 @@ export function Processos() {
                   setArea('')
                   setTribunal('')
                   setCliente('')
+                  setSistema('')
                   setMeus(false)
                 }}
               >
@@ -211,7 +222,14 @@ export function ProcessoDetalhe() {
               <Linha rotulo="Polo do cliente" valor={p.polo === 'ativo' ? 'Ativo (autor)' : 'Passivo (réu)'} />
               <Linha rotulo="Parte contrária" valor={p.parteContraria} />
               <Linha rotulo="Tribunal" valor={p.tribunal} />
-              <Linha rotulo="Sistema" valor={p.sistema} />
+              <Linha
+                rotulo="Sistema"
+                valor={
+                  <Link to="/integracoes/tribunais" className="font-medium text-primary hover:underline">
+                    {p.sistema} <span className="text-xs font-normal text-muted-foreground">(offline)</span>
+                  </Link>
+                }
+              />
               <Linha rotulo="Vara/órgão" valor={p.orgao} />
               <Linha rotulo="Área" valor={p.area} />
               <Linha rotulo="Equipe" valor={p.equipe} />
@@ -295,6 +313,19 @@ export function ProcessoDetalhe() {
           )}
         </CardContent>
       </Card>
+      <div className="mt-4">
+        <BlocoIntegracoes
+          acoes={[
+            { sistema: p.sistema, rotulo: `Abrir autos no ${p.sistema}`, icone: Gavel },
+            { sistema: 'iManage', rotulo: 'Pasta no iManage', icone: FolderOpen },
+            { sistema: 'DocuSign', rotulo: 'Enviar para assinatura', icone: FileSignature },
+            { sistema: 'Jusbrasil', rotulo: 'Pesquisar jurisprudência', icone: BookOpen },
+            { sistema: 'Dr. Calc', rotulo: 'Calcular no Dr. Calc', icone: Calculator },
+            { sistema: 'PortData', rotulo: 'Pedir certidões', icone: FileSearch },
+            { sistema: 'Jurídico Certo', rotulo: 'Contratar correspondente', icone: Users },
+          ]}
+        />
+      </div>
       <PrazoDetalheDialog prazoId={prazoAberto} aoFechar={() => setPrazoAberto(null)} />
     </div>
   )

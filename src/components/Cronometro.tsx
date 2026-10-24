@@ -92,7 +92,7 @@ export function CronometroFlutuante() {
         onClick={() => setAberto(true)}
         aria-label={ativo ? `Cronômetro ${rodando ? 'em andamento' : 'pausado'}: ${fmtCron(ms)}` : 'Abrir cronômetro'}
         className={cn(
-          'fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 items-center gap-2 rounded-full px-4 shadow-lg md:hidden',
+          'fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-30 flex h-14 items-center gap-2 rounded-full px-4 shadow-lg md:hidden',
           ativo ? 'bg-primary text-primary-foreground' : 'bg-card text-foreground border',
         )}
       >

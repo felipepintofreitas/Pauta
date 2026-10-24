@@ -11,6 +11,8 @@ import { resumoCliente, somaMinutos } from '@/lib/negocio'
 import { cn } from '@/lib/utils'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { CardGrupoIntegracao } from '@/components/Integracao'
+import { GRUPOS_INICIO } from '@/data/integracoes'
 
 interface Destaque {
   icone: typeof Timer
@@ -120,6 +122,9 @@ export function Inicio() {
             </span>
           </div>
         </Card>
+        {GRUPOS_INICIO.map((g) => (
+          <CardGrupoIntegracao key={g.id} grupo={g} />
+        ))}
       </div>
     </div>
   )

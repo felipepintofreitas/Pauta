@@ -7,6 +7,8 @@ import { data as fmtData, dataPorExtenso, horas } from '@/lib/formato'
 import { somaMinutos } from '@/lib/negocio'
 import { useCarregando } from '@/lib/hooks'
 import { CabecalhoPagina } from '@/components/Cabecalho'
+import { AcaoIntegracao } from '@/components/Integracao'
+import { Send } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Campo, Input, Select } from '@/components/ui/form'
 import { Skeleton } from '@/components/ui/skeleton'
@@ -86,6 +88,7 @@ export function Relatorio() {
               <Button variant="outline" onClick={copiarLink}>
                 <Link2 /> Copiar link
               </Button>
+              <AcaoIntegracao sistema="RD Station" rotulo="Registrar no RD Station" icone={Send} />
               <Button onClick={() => window.print()}>
                 <Printer /> Imprimir
               </Button>

@@ -21,7 +21,7 @@ import { Processos, ProcessoDetalhe } from '@/pages/Processos'
 import { Honorarios } from '@/pages/Honorarios'
 import { Relatorio } from '@/pages/Relatorio'
 import { Configuracoes } from '@/pages/Configuracoes'
-import { Integracoes } from '@/pages/Integracoes'
+import { GrupoIntegracao, Integracoes } from '@/pages/Integracoes'
 
 function Protegida({ rota, children }: { rota: Rota; children: ReactNode }) {
   const { usuario } = useApp()
@@ -78,6 +78,7 @@ export default function App() {
                 <Route path="/honorarios" element={<Protegida rota="honorarios"><Honorarios /></Protegida>} />
                 <Route path="/relatorio" element={<Protegida rota="relatorio"><Relatorio /></Protegida>} />
                 <Route path="/integracoes" element={<Integracoes />} />
+                <Route path="/integracoes/:grupo" element={<GrupoIntegracao />} />
                 <Route path="/configuracoes" element={<Protegida rota="configuracoes"><Configuracoes /></Protegida>} />
                 <Route path="*" element={<EstadoVazio icone={ShieldOff} titulo="Página não encontrada" descricao="O endereço não existe no protótipo." acao={<LinkBotao to="/">Ir para o início</LinkBotao>} />} />
               </Routes>

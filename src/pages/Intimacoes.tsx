@@ -33,7 +33,7 @@ export function Intimacoes() {
   const { toast } = useToast()
   const [params, setParams] = useSearchParams()
   const aba = (params.get('aba') as StatusIntimacao) || 'Nova'
-  const [fonte, setFonte] = useState('')
+  const [fonte, setFonte] = useState(params.get('fonte') ?? '')
   const [tribunal, setTribunal] = useState('')
   const [responsavel, setResponsavel] = useState('')
   const [de, setDe] = useState('')

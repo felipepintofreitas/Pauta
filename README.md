@@ -43,4 +43,9 @@ Simplificações: o Domicílio Judicial Eletrônico usa a mesma regra do DJEN (s
 
 ## Integrações
 
-A tela Integrações (`src/pages/Integracoes.tsx`, dados em `src/data/integracoes.ts`) lista os sistemas citados no levantamento de dores do escritório. Todos aparecem offline; nenhuma conexão real existe no protótipo.
+Os sistemas citados no levantamento de dores do escritório ficam em `src/data/integracoes.ts`, agrupados por seção, e todos aparecem offline; nenhuma conexão real existe no protótipo.
+
+- A página inicial mostra a Pauta do Dia e um card por seção de integrações (`ordemInicio`).
+- `/integracoes` mostra o encadeamento das seções (do DJEN ao protocolo) e `/integracoes/:grupo` mostra os sistemas da seção e as conexões com as telas da Pauta e com outras seções.
+- As fichas de processo e de intimação, o Timesheet e o Relatório têm botões de integração que só avisam que o sistema está offline.
+- O menu de navegação fica no canto superior direito.

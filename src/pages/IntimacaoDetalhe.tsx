@@ -15,6 +15,8 @@ import { Badge } from '@/components/ui/badge'
 import { Campo, Checkbox, Input, Select, Textarea } from '@/components/ui/form'
 import { EstadoVazio } from '@/components/ui/empty-state'
 import { useToast } from '@/components/ui/toast'
+import { BlocoIntegracoes } from '@/components/Integracao'
+import { Gavel, KeyRound, Newspaper, Sparkles } from 'lucide-react'
 import { AvisoCalculo, ConferenciaBadge, UrgenciaBadge } from '@/components/Urgencia'
 
 type EstadoEtapa = 'feita' | 'atual' | 'bloqueada'
@@ -178,6 +180,15 @@ export function IntimacaoDetalhe() {
               </dl>
             </CardContent>
           </Card>
+          <BlocoIntegracoes
+            grupo="intimacoes-oficiais"
+            acoes={[
+              { sistema: intim.fonte, rotulo: `Ver no ${intim.fonte === 'DJEN' ? 'DJEN' : 'Domicílio Eletrônico'}`, icone: Newspaper },
+              { sistema: processo.sistema, rotulo: `Abrir autos no ${processo.sistema}`, icone: Gavel },
+              { sistema: 'SAGA', rotulo: 'Minutar resposta com SAGA', icone: Sparkles },
+              { sistema: 'Whom', rotulo: 'Protocolar com certificado', icone: KeyRound },
+            ]}
+          />
           <Card>
             <CardHeader>
               <CardTitle>Histórico de auditoria</CardTitle>
