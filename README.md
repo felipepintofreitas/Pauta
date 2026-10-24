@@ -13,6 +13,10 @@ npm run build    # gera dist/ (abre de qualquer pasta: base relativa e HashRoute
 
 Requer Node 20 ou superior.
 
+## Publicação
+
+Cada push no `main` publica o app no GitHub Pages pelo workflow `.github/workflows/deploy.yml`: https://felipepintofreitas.github.io/Pauta/
+
 ## Organização
 
 ```
