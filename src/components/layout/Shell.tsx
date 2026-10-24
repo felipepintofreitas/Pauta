@@ -16,6 +16,8 @@ import {
   Plug,
   ChevronLeft,
   Home,
+  Check,
+  LogOut,
   Menu as MenuIcone,
   X,
   type LucideIcon,
@@ -24,13 +26,13 @@ import { useApp } from '@/store/store'
 import { useUi } from '@/store/ui'
 import { NOMES_PERFIL, type Perfil } from '@/data/tipos'
 import { menuDoPerfil, pode, type Rota } from '@/lib/permissoes'
-import { gravar } from '@/lib/armazenamento'
+import { gravar, ler } from '@/lib/armazenamento'
+import { hojeISO } from '@/lib/datas'
+import { dataPorExtenso } from '@/lib/formato'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
-import { Dialog } from '../ui/dialog'
-import { Select } from '../ui/form'
 import { Avatar } from '../Avatar'
-import { CronometroBarra, CronometroFlutuante } from '../Cronometro'
+import { CronometroFlutuante } from '../Cronometro'
 import { BuscaGlobal } from '../BuscaGlobal'
 import { LancarHorasDialog } from '../LancarHorasDialog'
 
@@ -73,30 +75,122 @@ export function useContagens(): Partial<Record<Rota, number>> {
   return {}
 }
 
-function SeletorPerfil({ id, className }: { id: string; className?: string }) {
-  const { db, usuario, trocarUsuario } = useApp()
-  const perfis: Perfil[] = ['advogado', 'estagiario', 'controladoria', 'socio', 'financeiro']
+const ORDEM_PERFIS: Perfil[] = ['advogado', 'estagiario', 'controladoria', 'socio', 'financeiro']
+
+function useUsuariosOrdenados() {
+  const { db } = useApp()
+  return ORDEM_PERFIS.flatMap((p) => db.usuarios.filter((u) => u.perfil === p))
+}
+
+/** Avatar do usuário logado com os dados dele, a troca de usuário e a saída do sistema. */
+function MenuUsuario({ aoSair }: { aoSair: () => void }) {
+  const { usuario, trocarUsuario } = useApp()
+  const usuarios = useUsuariosOrdenados()
+  const { aberto, setAberto, caixa, botao } = usePainel()
   return (
-    <Select id={id} aria-label="Perfil em uso no protótipo" value={usuario.id} onChange={(e) => trocarUsuario(e.target.value)} className={className}>
-      {perfis.map((p) => (
-        <optgroup key={p} label={NOMES_PERFIL[p]}>
-          {db.usuarios
-            .filter((u) => u.perfil === p)
-            .map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.nome} · {NOMES_PERFIL[p]}
-              </option>
-            ))}
-        </optgroup>
-      ))}
-    </Select>
+    <div ref={caixa} className="relative">
+      <Button ref={botao} variant="ghost" size="icon" className="rounded-full" aria-label={`Conta de ${usuario.nome}`} aria-expanded={aberto} aria-controls="menu-usuario" onClick={() => setAberto((v) => !v)}>
+        <Avatar nome={usuario.nome} id={usuario.id} />
+      </Button>
+      {aberto && (
+        <div id="menu-usuario" className="absolute right-0 top-full z-40 mt-2 w-72 max-w-[calc(100vw-1.5rem)] rounded-lg border bg-card shadow-lg">
+          <div className="flex items-center gap-3 border-b p-3">
+            <Avatar nome={usuario.nome} id={usuario.id} />
+            <div className="min-w-0 text-sm">
+              <p className="truncate font-semibold">{usuario.nome}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {usuario.cargo} · {NOMES_PERFIL[usuario.perfil]}
+              </p>
+              <p className="truncate text-xs text-muted-foreground">{usuario.email}</p>
+            </div>
+          </div>
+          <div className="max-h-[50vh] overflow-y-auto p-1.5">
+            <p className="px-2 pb-1 pt-1 text-xs font-medium text-muted-foreground" id="trocar-usuario">
+              Trocar usuário
+            </p>
+            <ul aria-labelledby="trocar-usuario">
+              {usuarios.map((u) => (
+                <li key={u.id}>
+                  <button
+                    type="button"
+                    aria-current={u.id === usuario.id ? 'true' : undefined}
+                    onClick={() => {
+                      trocarUsuario(u.id)
+                      setAberto(false)
+                    }}
+                    className={cn('flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-left text-sm hover:bg-muted', u.id === usuario.id && 'bg-secondary text-secondary-foreground')}
+                  >
+                    <Avatar nome={u.nome} id={u.id} />
+                    <span className="min-w-0 flex-1">
+                      <span className="block truncate font-medium">{u.nome}</span>
+                      <span className="block truncate text-xs text-muted-foreground">{NOMES_PERFIL[u.perfil]}</span>
+                    </span>
+                    {u.id === usuario.id && <Check className="size-4 shrink-0" aria-hidden />}
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="border-t p-1.5">
+            <button type="button" onClick={aoSair} className="flex min-h-11 w-full items-center gap-2 rounded-md px-2 text-sm font-medium text-red-700 hover:bg-muted dark:text-red-300">
+              <LogOut className="size-4" aria-hidden /> Sair do sistema
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Tela mostrada depois de sair: no protótipo, entrar é só escolher um usuário. */
+function TelaEntrada({ aoEntrar }: { aoEntrar: (id: string) => void }) {
+  const usuarios = useUsuariosOrdenados()
+  return (
+    <main className="grid min-h-dvh place-items-center p-4">
+      <div className="w-full max-w-sm rounded-lg border bg-card p-6 shadow-sm">
+        <Marca />
+        <h1 className="mt-4 text-xl font-semibold">Você saiu do sistema</h1>
+        <p className="mb-4 text-sm text-muted-foreground">Escolha um usuário para entrar de novo. No protótipo não há senha.</p>
+        <ul className="space-y-1">
+          {usuarios.map((u) => (
+            <li key={u.id}>
+              <button type="button" onClick={() => aoEntrar(u.id)} className="flex min-h-11 w-full items-center gap-2 rounded-md border px-3 py-1.5 text-left text-sm hover:border-primary hover:bg-muted">
+                <Avatar nome={u.nome} id={u.id} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-medium">{u.nome}</span>
+                  <span className="block truncate text-xs text-muted-foreground">
+                    {u.cargo} · {NOMES_PERFIL[u.perfil]}
+                  </span>
+                </span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </main>
+  )
+}
+
+function Saudacao() {
+  const { usuario } = useApp()
+  const h = new Date().getHours()
+  const ola = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
+  return (
+    <div className="min-w-0 border-l pl-4 leading-tight">
+      <p className="truncate text-sm font-semibold">
+        {ola}, {usuario.nome.split(' ')[0]}
+      </p>
+      <p className="truncate text-xs text-muted-foreground first-letter:uppercase">
+        {dataPorExtenso(hojeISO())} · {usuario.cargo}
+      </p>
+    </div>
   )
 }
 
 type ItemNavegacao = { rotulo: string; caminho: string; icone: LucideIcon; ativo: boolean; contagem?: number }
 
-/** Menu colapsável no canto superior direito com as áreas do sistema. */
-function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
+/** Estado de um painel suspenso: fecha ao trocar de página, ao clicar fora e com Esc. */
+function usePainel() {
   const [aberto, setAberto] = useState(false)
   const local = useLocation()
   const caixa = useRef<HTMLDivElement>(null)
@@ -120,12 +214,17 @@ function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
       document.removeEventListener('keydown', tecla)
     }
   }, [aberto])
+  return { aberto, setAberto, caixa, botao }
+}
+
+/** Menu colapsável no canto superior direito com as áreas do sistema. */
+function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
+  const { aberto, setAberto, caixa, botao } = usePainel()
   const pendentes = itens.reduce((s, i) => s + (i.contagem ?? 0), 0)
   return (
     <div ref={caixa} className="relative">
-      <Button ref={botao} variant="ghost" className="relative gap-2 px-2.5" aria-expanded={aberto} aria-controls="menu-principal" onClick={() => setAberto((v) => !v)}>
+      <Button ref={botao} variant="ghost" size="icon" className="relative" aria-label="Menu" aria-expanded={aberto} aria-controls="menu-principal" onClick={() => setAberto((v) => !v)}>
         {aberto ? <X /> : <MenuIcone />}
-        <span className="hidden sm:inline">Menu</span>
         {!!pendentes && (
           <span className="absolute right-0.5 top-0.5 rounded-full bg-primary px-1.5 text-[10px] font-semibold text-primary-foreground">
             {pendentes}
@@ -168,12 +267,12 @@ function MenuPrincipal({ itens }: { itens: ItemNavegacao[] }) {
 }
 
 export function Shell({ children }: { children: ReactNode }) {
-  const { usuario } = useApp()
+  const { usuario, trocarUsuario } = useApp()
   const { setBuscaAberta } = useUi()
+  const [conectado, setConectado] = useState(() => ler<string>('pauta:sessao') !== 'saiu')
   const tema = useTema()
   const local = useLocation()
   const contagens = useContagens()
-  const [perfilAberto, setPerfilAberto] = useState(false)
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [local.pathname])
@@ -190,7 +289,18 @@ export function Shell({ children }: { children: ReactNode }) {
     { rotulo: 'Integrações', caminho: '/integracoes', icone: Plug, ativo: emIntegracoes },
   ]
   if (menu.includes('configuracoes')) navegacao.push({ rotulo: 'Configurações', caminho: '/configuracoes', icone: Settings, ativo: emConfig })
+  const sair = () => {
+    gravar('pauta:sessao', 'saiu')
+    setConectado(false)
+  }
+  const entrar = (id: string) => {
+    trocarUsuario(id)
+    gravar('pauta:sessao', 'conectado')
+    setConectado(true)
+  }
   const modulo = (Object.keys(ITENS_MENU) as Rota[]).find((r) => r !== 'configuracoes' && caminho.startsWith(ITENS_MENU[r].caminho) && ITENS_MENU[r].caminho !== '/')
+
+  if (!conectado) return <TelaEntrada aoEntrar={entrar} />
 
   return (
     <div className="min-h-dvh">
@@ -201,48 +311,36 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="flex min-h-dvh flex-col">
         {/* Barra superior */}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-card/95 px-3 backdrop-blur md:h-16 md:px-6">
-          <Link to="/" aria-label="Pauta, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
-            <Marca />
-          </Link>
+          <div className="flex min-w-0 flex-1 items-center gap-4">
+            <Link to="/" aria-label="Pauta, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
+              <Marca />
+            </Link>
+            <div className="hidden min-w-0 lg:block">
+              <Saudacao />
+            </div>
+          </div>
           <button
             type="button"
             onClick={() => setBuscaAberta(true)}
-            className="ml-4 hidden min-h-10 w-full min-w-0 max-w-sm items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground hover:bg-muted xl:flex"
+            className="hidden min-h-10 w-[22rem] shrink items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground hover:bg-muted lg:flex xl:w-[28rem]"
           >
             <Search className="size-4 shrink-0" aria-hidden />
             <span className="truncate">Buscar processo, cliente, tarefa…</span>
             <kbd className="ml-auto whitespace-nowrap rounded border bg-muted px-1.5 text-xs">Ctrl K</kbd>
           </button>
-          <div className="ml-auto flex items-center gap-1 md:gap-2">
-            {lancaHoras && (
-              <div className="hidden lg:block">
-                <CronometroBarra />
-              </div>
-            )}
-            <Button variant="ghost" size="icon" className="xl:hidden" onClick={() => setBuscaAberta(true)} aria-label="Buscar">
+          <div className="flex flex-1 items-center justify-end gap-1 md:gap-2">
+            <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setBuscaAberta(true)} aria-label="Buscar">
               <Search />
             </Button>
             <Button variant="ghost" size="icon" onClick={tema.alternar} aria-label={tema.escuro ? 'Usar modo claro' : 'Usar modo escuro'}>
               {tema.escuro ? <Sun /> : <Moon />}
             </Button>
-            <div className="hidden items-center gap-2 xl:flex">
-              <label htmlFor="perfil-desktop" className="text-xs text-muted-foreground">
-                Perfil
-              </label>
-              <SeletorPerfil id="perfil-desktop" className="w-56" />
-            </div>
-            <Button variant="ghost" className="gap-2 px-2 xl:hidden" onClick={() => setPerfilAberto(true)} aria-label={`Trocar perfil (atual: ${usuario.nome}, ${NOMES_PERFIL[usuario.perfil]})`}>
-              <Avatar nome={usuario.nome} id={usuario.id} />
-              <span className="hidden text-left text-xs leading-tight md:block">
-                <span className="block font-medium text-foreground">{usuario.nome}</span>
-                <span className="block text-muted-foreground">{NOMES_PERFIL[usuario.perfil]}</span>
-              </span>
-            </Button>
+            <MenuUsuario aoSair={sair} />
             <MenuPrincipal itens={navegacao} />
           </div>
         </header>
 
-        <main id="conteudo" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-4 md:px-6 md:pb-10 md:pt-6">
+        <main id="conteudo" tabIndex={-1} className="mx-auto w-full max-w-7xl flex-1 px-4 pb-28 pt-4 md:px-6 md:pb-6 md:pt-6">
           {grupoIntegracao && (
             <nav aria-label="Você está em" className="mb-2 text-sm">
               <Link to="/integracoes" className="inline-flex min-h-11 items-center gap-1 font-medium text-primary hover:underline md:min-h-0">
@@ -261,10 +359,6 @@ export function Shell({ children }: { children: ReactNode }) {
           {children}
         </main>
       </div>
-
-      <Dialog aberto={perfilAberto} aoFechar={() => setPerfilAberto(false)} titulo="Perfil do protótipo" descricao="Trocar o perfil muda o menu, a tela inicial e as permissões." tamanho="sm">
-        <SeletorPerfil id="perfil-mobile" />
-      </Dialog>
 
       {lancaHoras && <CronometroFlutuante />}
       <BuscaGlobal />

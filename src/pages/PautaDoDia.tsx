@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useApp } from '@/store/store'
-import { menuDoPerfil, type Rota } from '@/lib/permissoes'
+import { menuDoPerfil, pode, type Rota } from '@/lib/permissoes'
+import { CronometroBarra } from '@/components/Cronometro'
 import { CabecalhoPagina } from '@/components/Cabecalho'
 import { ITENS_MENU, useContagens } from '@/components/layout/Shell'
 
@@ -29,8 +30,8 @@ export function PautaDoDia() {
           const Icone = item.icone
           const n = contagens[r]
           return (
-            <li key={r}>
-              <Link to={item.caminho} className="flex h-full items-start gap-3 rounded-lg border bg-card p-4 shadow-sm transition-colors hover:border-primary hover:bg-muted/40">
+            <li key={r} className="relative flex h-full flex-col gap-3 rounded-lg border bg-card p-4 shadow-sm transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary hover:bg-muted/40">
+              <Link to={item.caminho} className="flex items-start gap-3 after:absolute after:inset-0 after:rounded-lg focus:outline-none">
                 <span className="grid size-10 shrink-0 place-items-center rounded-md bg-secondary text-secondary-foreground">
                   <Icone className="size-5" aria-hidden />
                 </span>
@@ -47,6 +48,11 @@ export function PautaDoDia() {
                   <span className="mt-0.5 block text-sm text-muted-foreground">{DESCRICOES[r]}</span>
                 </span>
               </Link>
+              {r === 'timesheet' && pode(usuario.perfil, 'lancarHoras') && (
+                <div className="relative z-10 mt-auto self-start">
+                  <CronometroBarra />
+                </div>
+              )}
             </li>
           )
         })}

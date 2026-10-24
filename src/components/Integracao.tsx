@@ -51,10 +51,10 @@ export function CardGrupoIntegracao({ grupo }: { grupo: GrupoIntegracoes }) {
   const { db } = useApp()
   const Icone = grupo.icone
   return (
-    <Card className="relative flex h-full flex-col p-5 transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary">
+    <Card className="relative flex h-full flex-col p-4 transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary">
       <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground">
-          <Icone className="size-6" aria-hidden />
+        <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-secondary text-secondary-foreground">
+          <Icone className="size-5" aria-hidden />
         </span>
         <div className="min-w-0">
           <h2 className="text-base font-semibold leading-tight">
@@ -62,13 +62,11 @@ export function CardGrupoIntegracao({ grupo }: { grupo: GrupoIntegracoes }) {
               {grupo.titulo}
             </Link>
           </h2>
-          <p className="mt-0.5 text-sm text-muted-foreground">{grupo.descricao}</p>
+          <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">{grupo.descricao}</p>
         </div>
       </div>
-      <p className="mt-3 text-sm">
-        <span className="font-semibold">{resumoDoGrupo(db, grupo)}</span>
-        <span className="text-muted-foreground"> · {grupo.itens.map((i) => i.nome).join(', ')}</span>
-      </p>
+      <p className="mt-3 text-sm font-semibold">{resumoDoGrupo(db, grupo)}</p>
+      <p className="line-clamp-2 text-xs text-muted-foreground">{grupo.itens.map((i) => i.nome).join(', ')}</p>
       <div className="mt-auto flex flex-wrap items-center gap-2 pt-3">
         <Badge variant="outline" className="text-muted-foreground">
           <WifiOff aria-hidden /> Offline
