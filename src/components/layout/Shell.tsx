@@ -12,7 +12,6 @@ import {
   FileText,
   Settings,
   Search,
-  LayoutGrid,
   CalendarDays,
   ChevronLeft,
   Home,
@@ -108,7 +107,6 @@ export function Shell({ children }: { children: ReactNode }) {
   const emConfig = caminho.startsWith('/configuracoes')
   const pendentesPauta = Object.values(contagens).reduce((s, n) => s + (n ?? 0), 0)
   const navegacao: { rotulo: string; caminho: string; icone: LucideIcon; ativo: boolean; contagem?: number }[] = [
-    { rotulo: 'Início', caminho: '/', icone: LayoutGrid, ativo: caminho === '/' },
     { rotulo: 'Pauta do Dia', caminho: '/pauta', icone: CalendarDays, ativo: caminho !== '/' && !emConfig, contagem: pendentesPauta },
   ]
   if (menu.includes('configuracoes')) navegacao.push({ rotulo: 'Configurações', caminho: '/configuracoes', icone: Settings, ativo: emConfig })
@@ -123,7 +121,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <div className="flex min-h-dvh flex-col">
         {/* Barra superior */}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-card/95 px-3 backdrop-blur md:h-16 md:px-6">
-          <Link to="/" aria-label="Pauta, ir para o início" className="shrink-0 rounded-md">
+          <Link to="/" aria-label="Pauta, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
             <Marca />
           </Link>
           <nav aria-label="Menu principal" className="ml-4 hidden items-center gap-1 md:flex">
@@ -203,8 +201,8 @@ export function Shell({ children }: { children: ReactNode }) {
 
       {/* Navegação inferior (celular) */}
       <nav aria-label="Navegação principal" className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t bg-card md:hidden">
-        <ul className={cn('grid', navegacao.length === 3 ? 'grid-cols-4' : 'grid-cols-3')}>
-          {[...navegacao.slice(0, 2), { rotulo: 'Buscar', caminho: '', icone: Search, ativo: false, contagem: 0 }, ...navegacao.slice(2)].map((item) => {
+        <ul className={cn('grid', navegacao.length === 2 ? 'grid-cols-3' : 'grid-cols-2')}>
+          {[...navegacao.slice(0, 1), { rotulo: 'Buscar', caminho: '', icone: Search, ativo: false, contagem: 0 }, ...navegacao.slice(1)].map((item) => {
             const Icone = item.icone
             const conteudo = (
               <>
