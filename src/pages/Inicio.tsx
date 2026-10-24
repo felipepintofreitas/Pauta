@@ -2,9 +2,8 @@ import { Link } from 'react-router-dom'
 import { AlertTriangle, CalendarDays, Clock3, Inbox, ListChecks, Plus, ShieldAlert, Timer, Wallet } from 'lucide-react'
 import { useApp } from '@/store/store'
 import { useUi } from '@/store/ui'
-import { NOMES_PERFIL } from '@/data/tipos'
 import { hojeISO, inicioDoMes, fimDoMes } from '@/lib/datas'
-import { dataPorExtenso, horas, reais } from '@/lib/formato'
+import { horas, reais } from '@/lib/formato'
 import { urgencia, dataReferencia } from '@/lib/urgencia'
 import { pode } from '@/lib/permissoes'
 import { resumoCliente, somaMinutos } from '@/lib/negocio'
@@ -20,11 +19,6 @@ interface Destaque {
   rotulo: string
   valor: string
   classe?: string
-}
-
-function saudacao() {
-  const h = new Date().getHours()
-  return h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
 }
 
 /** Números do dia mostrados no card, conforme o perfil. */
@@ -78,17 +72,7 @@ export function Inicio() {
   const lanca = pode(usuario.perfil, 'lancarHoras')
   return (
     <div className="lg:flex lg:h-[calc(100dvh-4rem-3rem)] lg:min-h-[30rem] lg:flex-col">
-      {/* No computador a saudação fica na barra do topo */}
-      <div className="mb-4 lg:hidden">
-        <p className="text-sm text-muted-foreground first-letter:uppercase">{dataPorExtenso(hojeISO())}</p>
-        <h1 className="text-xl font-semibold tracking-tight md:text-2xl">
-          {saudacao()}, {usuario.nome.split(' ')[0]}
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          {usuario.cargo} · {NOMES_PERFIL[usuario.perfil]}
-        </p>
-      </div>
-      <h1 className="sr-only max-lg:hidden">Início</h1>
+      <h1 className="sr-only">Início</h1>
 
       <div className="grid gap-4 md:grid-cols-2 lg:min-h-0 lg:flex-1 lg:grid-cols-4 lg:grid-rows-2">
         <Card className="relative flex flex-col p-4 transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary">

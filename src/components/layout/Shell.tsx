@@ -27,8 +27,6 @@ import { useUi } from '@/store/ui'
 import { NOMES_PERFIL, type Perfil } from '@/data/tipos'
 import { menuDoPerfil, pode, type Rota } from '@/lib/permissoes'
 import { gravar, ler } from '@/lib/armazenamento'
-import { hojeISO } from '@/lib/datas'
-import { dataPorExtenso } from '@/lib/formato'
 import { cn } from '@/lib/utils'
 import { Button } from '../ui/button'
 import { Avatar } from '../Avatar'
@@ -171,22 +169,6 @@ function TelaEntrada({ aoEntrar }: { aoEntrar: (id: string) => void }) {
   )
 }
 
-function Saudacao() {
-  const { usuario } = useApp()
-  const h = new Date().getHours()
-  const ola = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite'
-  return (
-    <div className="min-w-0 border-l pl-4 leading-tight">
-      <p className="truncate text-sm font-semibold">
-        {ola}, {usuario.nome.split(' ')[0]}
-      </p>
-      <p className="truncate text-xs text-muted-foreground first-letter:uppercase">
-        {dataPorExtenso(hojeISO())} · {usuario.cargo}
-      </p>
-    </div>
-  )
-}
-
 type ItemNavegacao = { rotulo: string; caminho: string; icone: LucideIcon; ativo: boolean; contagem?: number }
 
 /** Estado de um painel suspenso: fecha ao trocar de página, ao clicar fora e com Esc. */
@@ -315,9 +297,6 @@ export function Shell({ children }: { children: ReactNode }) {
             <Link to="/" aria-label="Pauta, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
               <Marca />
             </Link>
-            <div className="hidden min-w-0 lg:block">
-              <Saudacao />
-            </div>
           </div>
           <button
             type="button"
