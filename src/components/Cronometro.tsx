@@ -85,7 +85,7 @@ export function CronometroDia() {
   const { ativo } = useTempo()
   if (ativo) return <CronometroBarra />
   return (
-    <Button size="sm" onClick={() => iniciarCronometro()}>
+    <Button size="sm" variant="outline" className="min-h-11 px-2.5 text-xs md:h-8 md:min-h-8 [&_svg]:size-3.5" onClick={() => iniciarCronometro()}>
       <Play /> Iniciar Dia
     </Button>
   )

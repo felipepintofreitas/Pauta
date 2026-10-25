@@ -73,11 +73,6 @@ export function Inicio() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:min-h-0 lg:flex-1 lg:grid-cols-4 lg:grid-rows-2">
         <Card className="relative flex flex-col p-4 transition-colors focus-within:ring-2 focus-within:ring-ring hover:border-primary">
-          {lanca && (
-            <div className="relative z-10 mb-3 flex">
-              <CronometroDia />
-            </div>
-          )}
           <div className="flex items-start gap-3">
             <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
               <CalendarDays className="size-5" aria-hidden />
@@ -101,6 +96,11 @@ export function Inicio() {
               </div>
             ))}
           </dl>
+          {lanca && (
+            <div className="relative z-10 mt-auto flex pt-3">
+              <CronometroDia />
+            </div>
+          )}
         </Card>
         {GRUPOS_INICIO.map((g) => (
           <CardGrupoIntegracao key={g.id} grupo={g} />
