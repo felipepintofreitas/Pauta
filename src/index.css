@@ -4,43 +4,48 @@
 
 @layer base {
   :root {
-    --background: 210 20% 97%;
-    --foreground: 215 28% 13%;
+    /* Paleta derivada da marca Madrona: azul #00b2ff e cinza do "advogados". */
+    --brand: 198 100% 50%;
+    --brand-muted: 0 0% 40%;
+    --background: 200 20% 97%;
+    --foreground: 205 30% 12%;
     --card: 0 0% 100%;
-    --card-foreground: 215 28% 13%;
-    --primary: 189 76% 24%;
+    --card-foreground: 205 30% 12%;
+    --primary: 200 100% 31%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 189 30% 92%;
-    --secondary-foreground: 189 70% 18%;
-    --muted: 210 18% 93%;
-    --muted-foreground: 215 14% 36%;
-    --accent: 189 35% 90%;
-    --accent-foreground: 189 70% 16%;
+    --secondary: 198 60% 93%;
+    --secondary-foreground: 200 90% 20%;
+    --muted: 200 16% 93%;
+    --muted-foreground: 205 12% 36%;
+    --accent: 198 60% 91%;
+    --accent-foreground: 200 90% 18%;
     --destructive: 0 72% 42%;
     --destructive-foreground: 0 0% 100%;
-    --border: 214 18% 86%;
-    --input: 214 16% 72%;
-    --ring: 189 76% 30%;
+    --border: 200 16% 86%;
+    --input: 200 14% 72%;
+    --ring: 200 100% 35%;
     color-scheme: light;
   }
   .dark {
-    --background: 215 28% 8%;
-    --foreground: 210 20% 94%;
-    --card: 215 25% 12%;
-    --card-foreground: 210 20% 94%;
-    --primary: 186 58% 52%;
-    --primary-foreground: 215 30% 8%;
-    --secondary: 189 30% 18%;
-    --secondary-foreground: 186 50% 85%;
-    --muted: 215 20% 17%;
-    --muted-foreground: 215 14% 70%;
-    --accent: 189 30% 20%;
-    --accent-foreground: 186 50% 88%;
+    --brand: 198 100% 50%;
+    --brand-muted: 0 0% 68%;
+    --background: 205 30% 7%;
+    --foreground: 200 20% 94%;
+    --card: 205 26% 11%;
+    --card-foreground: 200 20% 94%;
+    --primary: 198 100% 50%;
+    --primary-foreground: 205 60% 7%;
+    --secondary: 200 45% 17%;
+    --secondary-foreground: 198 80% 86%;
+    --muted: 205 20% 16%;
+    --muted-foreground: 205 12% 70%;
+    --accent: 200 40% 19%;
+    --accent-foreground: 198 80% 88%;
     --destructive: 0 70% 60%;
-    --destructive-foreground: 215 30% 8%;
-    --border: 215 18% 23%;
-    --input: 215 16% 38%;
-    --ring: 186 58% 58%;
+    --destructive-foreground: 205 30% 8%;
+    --border: 205 18% 22%;
+    --input: 205 16% 38%;
+    --ring: 198 100% 55%;
     color-scheme: dark;
   }
   * {

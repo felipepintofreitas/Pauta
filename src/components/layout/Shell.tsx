@@ -56,13 +56,12 @@ function useTema() {
   return { escuro, alternar: () => setEscuro((v) => !v) }
 }
 
+/** Marca do escritório: "madrona" em azul e "advogados" em cinza, como no logo. */
 function Marca() {
   return (
-    <span className="flex items-center gap-2 font-semibold tracking-tight">
-      <span aria-hidden className="grid size-8 place-items-center rounded-md bg-primary text-sm font-bold text-primary-foreground">
-        P
-      </span>
-      <span className="text-lg">Pauta</span>
+    <span className="flex flex-col leading-none" aria-hidden>
+      <span className="text-[1.45rem] font-extrabold lowercase tracking-[-0.03em] text-brand">madrona</span>
+      <span className="-mt-0.5 pl-px text-[0.8rem] font-normal lowercase tracking-[0.01em] text-brand-muted">advogados</span>
     </span>
   )
 }
@@ -310,7 +309,7 @@ export function Shell({ children }: { children: ReactNode }) {
         {/* Barra superior */}
         <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b bg-card/95 px-3 backdrop-blur md:h-16 md:px-6">
           <div className="flex min-w-0 flex-1 items-center gap-4">
-            <Link to="/" aria-label="Pauta, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
+            <Link to="/" aria-label="Madrona Advogados, ir para o início" title="Ir para o início" className="shrink-0 rounded-md">
               <Marca />
             </Link>
           </div>

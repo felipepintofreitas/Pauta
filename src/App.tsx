@@ -50,7 +50,7 @@ function TituloDaPagina() {
   useEffect(() => {
     const nomes: Record<string, string> = { intimacoes: 'Intimações', prazos: 'Prazos', tarefas: 'Tarefas', timesheet: 'Timesheet', processos: 'Processos', honorarios: 'Honorários', relatorio: 'Relatório', configuracoes: 'Configurações', integracoes: 'Integrações' }
     const secao = nomes[pathname.split('/')[1]] ?? ({ pauta: 'Pauta do Dia', 'meu-dia': 'Meu dia' } as Record<string, string>)[pathname.split('/')[1]] ?? 'Início'
-    document.title = `${secao} · Pauta`
+    document.title = `${secao} · Madrona Advogados`
   }, [pathname])
   return null
 }
