@@ -36,7 +36,7 @@ Simplificações: o Domicílio Judicial Eletrônico usa a mesma regra do DJEN (s
 
 ## Para testar os critérios de aceite
 
-- **3 toques:** perfil Ana (advogada), em Meu dia toque em “Lançar horas”, escolha um processo recente e toque em “30min”.
+- **3 toques:** perfil Amanda (advogada), em Meu dia toque em “Lançar horas”, escolha um processo recente e toque em “30min”.
 - **4 etapas:** perfil Elisa (controladoria), abra uma intimação nova, classifique, lance o prazo e gere a tarefa. A conferência fica bloqueada para ela; troque para Fábio no seletor de perfil e confira. O histórico mostra os dois.
 - Em fim de semana ou feriado, a pauta mostra o próximo dia útil e avisa no topo de Meu dia.
 - “Restaurar dados” em Configurações desfaz tudo.

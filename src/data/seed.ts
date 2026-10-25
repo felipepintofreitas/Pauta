@@ -29,7 +29,7 @@ import type {
   StatusTarefa,
 } from './tipos'
 
-export const VERSAO_DADOS = 4
+export const VERSAO_DADOS = 5
 
 function mulberry32(seed: number) {
   let a = seed
@@ -43,7 +43,7 @@ function mulberry32(seed: number) {
 }
 
 export const USUARIOS: Usuario[] = [
-  { id: 'u1', nome: 'Ana Ribeiro', perfil: 'advogado', cargo: 'Advogada sênior', equipe: 'Cível', email: 'ana.ribeiro@escritorio.adv.br' },
+  { id: 'u1', nome: 'Amanda Figueiroa', perfil: 'advogado', cargo: 'Advogada sênior', equipe: 'Cível', email: 'amanda.figueiroa@escritorio.adv.br' },
   { id: 'u2', nome: 'Bruno Cavalcanti', perfil: 'advogado', cargo: 'Advogado pleno', equipe: 'Trabalhista', email: 'bruno.cavalcanti@escritorio.adv.br' },
   { id: 'u3', nome: 'Carla Menezes', perfil: 'advogado', cargo: 'Advogada pleno', equipe: 'Tributário', email: 'carla.menezes@escritorio.adv.br' },
   { id: 'u4', nome: 'Diego Albuquerque', perfil: 'estagiario', cargo: 'Estagiário', equipe: 'Cível', email: 'diego.albuquerque@escritorio.adv.br' },
@@ -470,10 +470,10 @@ export function gerarDados(hoje: DataISO = hojeISO()): BancoDados {
       for (let q = 0; q < qtd; q++) novoLancamento(u, data, pick([30, 45, 60, 90, 120, 150, 180, 210, 240]))
     }
   }
-  // Hoje: Ana com 3h30, demais com algo lançado
-  const procAna = processos.filter((p) => p.responsavelId === 'u1')
-  novoLancamento('u1', hoje, 120, { processoId: procAna[0]?.id, descricao: 'Elaboração de minuta de contestação' })
-  novoLancamento('u1', hoje, 90, { processoId: procAna[1]?.id, descricao: 'Reunião com o cliente' })
+  // Hoje: Amanda com 3h30, demais com algo lançado
+  const procAmanda = processos.filter((p) => p.responsavelId === 'u1')
+  novoLancamento('u1', hoje, 120, { processoId: procAmanda[0]?.id, descricao: 'Elaboração de minuta de contestação' })
+  novoLancamento('u1', hoje, 90, { processoId: procAmanda[1]?.id, descricao: 'Reunião com o cliente' })
   novoLancamento('u2', hoje, 150)
   novoLancamento('u4', hoje, 60)
   novoLancamento('u3', hoje, 240)
