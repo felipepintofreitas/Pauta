@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { AlertTriangle, CalendarDays, Clock3, Inbox, ListChecks, ShieldAlert, Timer, Wallet } from 'lucide-react'
 import { useApp } from '@/store/store'
-import { hojeISO, inicioDoMes, fimDoMes } from '@/lib/datas'
-import { horas, reais } from '@/lib/formato'
+import { diaDaSemana, hojeISO, inicioDoMes, fimDoMes, somarDias } from '@/lib/datas'
+import { horas } from '@/lib/formato'
 import { urgencia, dataReferencia } from '@/lib/urgencia'
 import { pode } from '@/lib/permissoes'
 import { resumoCliente, somaMinutos } from '@/lib/negocio'
@@ -19,6 +19,18 @@ interface Destaque {
   classe?: string
 }
 
+/** Valor em reais abreviado para caber no card (ex.: R$ 133,9 mil). */
+const reaisCurto = (v: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', notation: 'compact', maximumFractionDigits: 1 }).format(v)
+
+const DIAS_CURTOS = ['dom.', 'seg.', 'ter.', 'qua.', 'qui.', 'sex.', 'sáb.']
+
+/** Rótulo curto para os prazos do dia de referência: hoje, amanhã ou o dia da semana. */
+function rotuloVencem(hoje: string, ref: string) {
+  if (ref === hoje) return 'Para hoje'
+  if (ref === somarDias(hoje, 1)) return 'Para amanhã'
+  return `Para ${DIAS_CURTOS[diaDaSemana(ref)]}`
+}
+
 /** Números do dia mostrados no card, conforme o perfil. */
 function useDestaques(): Destaque[] {
   const { db, usuario } = useApp()
@@ -31,16 +43,16 @@ function useDestaques(): Destaque[] {
     const enviados = db.lancamentos.filter((l) => l.status === 'Enviado')
     const aFaturar = db.clientes.reduce((s, c) => s + resumoCliente(db, c, inicioDoMes(hoje), fimDoMes(hoje)).total, 0)
     return [
-      { icone: Timer, rotulo: 'Horas para aprovar', valor: horas(somaMinutos(enviados)), classe: enviados.length ? 'urg-ate7' : undefined },
-      { icone: Wallet, rotulo: 'A faturar no mês', valor: reais(aFaturar) },
+      { icone: Timer, rotulo: 'A aprovar', valor: horas(somaMinutos(enviados)), classe: enviados.length ? 'urg-ate7' : undefined },
+      { icone: Wallet, rotulo: 'A faturar', valor: reaisCurto(aFaturar) },
     ]
   }
   if (usuario.perfil === 'socio') {
     const vencidos = abertos.filter((p) => nivel(p.dataFatal) === 'vencido').length
     return [
-      { icone: AlertTriangle, rotulo: 'Prazos vencidos', valor: String(vencidos), classe: vencidos ? 'urg-vencido' : undefined },
-      { icone: ShieldAlert, rotulo: 'Sem conferência', valor: String(abertos.filter((p) => p.conferencia === 'Pendente').length), classe: 'urg-ate7' },
-      { icone: Wallet, rotulo: 'A faturar no mês', valor: reais(db.clientes.reduce((s, c) => s + resumoCliente(db, c, inicioDoMes(hoje), fimDoMes(hoje)).total, 0)) },
+      { icone: AlertTriangle, rotulo: 'Vencidos', valor: String(vencidos), classe: vencidos ? 'urg-vencido' : undefined },
+      { icone: ShieldAlert, rotulo: 'A conferir', valor: String(abertos.filter((p) => p.conferencia === 'Pendente').length), classe: 'urg-ate7' },
+      { icone: Wallet, rotulo: 'A faturar', valor: reaisCurto(db.clientes.reduce((s, c) => s + resumoCliente(db, c, inicioDoMes(hoje), fimDoMes(hoje)).total, 0)) },
     ]
   }
   const meus = usuario.perfil === 'controladoria' ? abertos : abertos.filter((p) => p.responsavelId === usuario.id)
@@ -50,16 +62,16 @@ function useDestaques(): Destaque[] {
   const lancado = somaMinutos(db.lancamentos.filter((l) => l.usuarioId === usuario.id && l.data === hoje))
   const lista: Destaque[] = []
   if (usuario.perfil !== 'estagiario') {
-    lista.push({ icone: AlertTriangle, rotulo: 'Prazos vencidos', valor: String(vencidos), classe: vencidos ? 'urg-vencido' : undefined })
-    lista.push({ icone: Clock3, rotulo: ref === hoje ? 'Vencem hoje' : 'Vencem no próximo dia útil', valor: String(vencemHoje), classe: vencemHoje ? 'urg-hoje' : undefined })
+    lista.push({ icone: AlertTriangle, rotulo: 'Vencidos', valor: String(vencidos), classe: vencidos ? 'urg-vencido' : undefined })
+    lista.push({ icone: Clock3, rotulo: rotuloVencem(hoje, ref), valor: String(vencemHoje), classe: vencemHoje ? 'urg-hoje' : undefined })
   }
   if (usuario.perfil === 'controladoria') {
     const novas = db.intimacoes.filter((i) => i.status === 'Nova').length
-    lista.push({ icone: Inbox, rotulo: 'Intimações novas', valor: String(novas), classe: novas ? 'urg-ate3' : undefined })
+    lista.push({ icone: Inbox, rotulo: 'Intimações', valor: String(novas), classe: novas ? 'urg-ate3' : undefined })
   } else {
-    lista.push({ icone: ListChecks, rotulo: 'Tarefas para hoje', valor: String(tarefas) })
+    lista.push({ icone: ListChecks, rotulo: 'Tarefas', valor: String(tarefas) })
   }
-  lista.push({ icone: Timer, rotulo: 'Horas hoje', valor: `${horas(lancado)} de ${horas(db.config.metaDiariaMin)}` })
+  lista.push({ icone: Timer, rotulo: 'Horas', valor: `${horas(lancado)}/${horas(db.config.metaDiariaMin)}` })
   return lista
 }
 
@@ -86,13 +98,16 @@ export function Inicio() {
               <p className="truncate text-sm text-muted-foreground">Sua rotina de hoje</p>
             </div>
           </div>
-          <dl className="mt-3 space-y-1">
+          <dl className="mt-3 grid grid-cols-2 gap-2">
             {destaques.map((d) => (
-              <div key={d.rotulo} className={cn('flex items-center justify-between gap-2 rounded-md border px-2.5 py-1', d.classe ?? 'bg-muted/50')}>
-                <dt className="flex min-w-0 items-center gap-1.5 text-xs font-medium">
-                  <d.icone className="size-3.5 shrink-0" aria-hidden /> <span className="truncate">{d.rotulo}</span>
+              <div key={d.rotulo} className={cn('rounded-md border px-2 py-1.5', d.classe ?? 'bg-muted/50')}>
+                <dt className="flex min-w-0 items-center gap-1 text-xs font-medium">
+                  <d.icone className="size-3 shrink-0" aria-hidden />
+                  <span className="truncate" title={d.rotulo}>
+                    {d.rotulo}
+                  </span>
                 </dt>
-                <dd className="whitespace-nowrap text-sm font-semibold tabular-nums">{d.valor}</dd>
+                <dd className="truncate text-lg font-semibold leading-tight tabular-nums">{d.valor}</dd>
               </div>
             ))}
           </dl>
